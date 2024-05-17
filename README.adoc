@@ -1,0 +1,9 @@
+# Camel k to Camel Quarkus migrator
+
+This repository contains some example of moving a Camel K integration to Camel Quarkus on-prem or on Kubernetes/Openshift
+
+I'm taking the Camel K official examples as target.
+
+##
+
+Camel-k-basic-example

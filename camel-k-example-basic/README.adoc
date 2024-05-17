@@ -1,0 +1,409 @@
+# Camel K Basic Example
+
+This example demonstrates how to get started with Camel K by showing you some of the most important
+features that you should know before trying to develop more complex examples.
+
+We are going to use Camel-Jbang to create the basic project for Camel Quarkus and then iterate to deploy on OCP.
+
+## Install JBang
+
+First install JBang according to https://www.jbang.dev
+
+When JBang is installed then you should be able to run from a shell:
+
+[source,sh]
+----
+$ jbang --version
+----
+
+This will output the version of JBang.
+
+To run this example you can either install Camel on JBang via:
+
+[source,sh]
+----
+$ jbang app install camel@apache/camel
+----
+
+Which allows to run CamelJBang with `camel` as shown below.
+
+=== Export to Camel-Quarkus with on-premise as target
+
+Let's use the export subcommand from camel-jbang
+
+[source,sh]
+----
+$ camel export --runtime=quarkus --gav=com.github.oscerd:camel-k-example-basic-migrated-to-quarkus:1.0-SNAPSHOT --directory=./camel-k-example-basic-quarkus-on-prem
+----
+
+This will create the directory in the same folder as the example
+
+[source,sh]
+----
+Generating fresh run data
+Exporting as Quarkus project to: ./camel-k-example-basic-quarkus-on-prem
+----
+
+Now we can try to run the project on-premise:
+
+[source,sh]
+----
+[oscerd@ghost camel-k-example-basic]$ cd camel-k-example-basic-quarkus-on-prem/
+[oscerd@ghost camel-k-example-basic-quarkus-on-prem]$ mvn quarkus:dev
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----< com.github.oscerd:camel-k-example-basic-migrated-to-quarkus >-----
+[INFO] Building camel-k-example-basic-migrated-to-quarkus 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- quarkus:3.10.0:dev (default-cli) @ camel-k-example-basic-migrated-to-quarkus ---
+[INFO] Invoking resources:3.3.0:resources (default-resources) @ camel-k-example-basic-migrated-to-quarkus
+[INFO] Copying 1 resource
+[INFO] Invoking quarkus:3.10.0:generate-code (default) @ camel-k-example-basic-migrated-to-quarkus
+[INFO] Invoking compiler:3.13.0:compile (default-compile) @ camel-k-example-basic-migrated-to-quarkus
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug release 17] to target/classes
+[INFO] Invoking resources:3.3.0:testResources (default-testResources) @ camel-k-example-basic-migrated-to-quarkus
+[INFO] skip non existing resourceDirectory /home/oscerd/workspace/redhat/migration-k-quarkus/camel-k-example-basic/camel-k-example-basic-quarkus-on-prem/src/test/resources
+[INFO] Invoking quarkus:3.10.0:generate-code-tests (default) @ camel-k-example-basic-migrated-to-quarkus
+[INFO] Invoking compiler:3.13.0:testCompile (default-testCompile) @ camel-k-example-basic-migrated-to-quarkus
+[INFO] No sources to compile
+Listening for transport dt_socket at address: 5005
+
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2024-05-17 09:27:02,999 INFO  [org.apa.cam.qua.cor.CamelBootstrapRecorder] (Quarkus Main Thread) Bootstrap runtime: org.apache.camel.quarkus.main.CamelMainRuntime
+
+2024-05-17 09:27:03,001 INFO  [org.apa.cam.mai.MainSupport] (Quarkus Main Thread) Apache Camel (Main) 4.5.0 is starting
+2024-05-17 09:27:03,164 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Quarkus Main Thread) Apache Camel 4.5.0 (camel-1) is starting
+2024-05-17 09:27:03,177 INFO  [org.apa.cam.mai.BaseMainSupport] (Quarkus Main Thread) Property-placeholders summary
+2024-05-17 09:27:03,178 INFO  [org.apa.cam.mai.BaseMainSupport] (Quarkus Main Thread)     [MicroProfilePropertiesSource] priority-marker=*
+2024-05-17 09:27:03,179 INFO  [org.apa.cam.mai.BaseMainSupport] (Quarkus Main Thread)     [MicroProfilePropertiesSource] items=*radiator *engine door window
+2024-05-17 09:27:03,180 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Quarkus Main Thread) Routes startup (total:4)
+2024-05-17 09:27:03,180 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Quarkus Main Thread)     Started route1 (timer://java)
+2024-05-17 09:27:03,181 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Quarkus Main Thread)     Started generator (timer://java)
+2024-05-17 09:27:03,181 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Quarkus Main Thread)     Started standard (direct://standardQueue)
+2024-05-17 09:27:03,182 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Quarkus Main Thread)     Started priority (direct://priorityQueue)
+2024-05-17 09:27:03,182 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Quarkus Main Thread) Apache Camel 4.5.0 (camel-1) started in 17ms (build:0ms init:0ms start:17ms)
+2024-05-17 09:27:03,261 INFO  [io.quarkus] (Quarkus Main Thread) camel-k-example-basic-migrated-to-quarkus 1.0-SNAPSHOT on JVM (powered by Quarkus 3.10.0) started in 2.083s. Listening on: http://localhost:8080
+2024-05-17 09:27:03,262 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
+2024-05-17 09:27:03,262 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [camel-attachments, camel-bean, camel-core, camel-direct, camel-log, camel-microprofile-health, camel-platform-http, camel-rest, camel-rest-openapi, camel-timer, cdi, smallrye-context-propagation, smallrye-health, vertx]
+2024-05-17 09:27:04,196 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:04,223 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 09:27:05,178 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:06,178 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:07,178 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:07,201 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 09:27:08,178 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:09,178 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:10,178 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:10,201 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 09:27:11,178 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:12,179 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:13,179 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:13,201 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 09:27:14,179 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:15,179 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:16,179 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:27:16,201 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 09:27:16,515 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread) Apache Camel 4.5.0 (camel-1) is shutting down
+
+--
+Tests paused
+Press [e] to edit command line args (currently ''), [r] to resume testing, [o] Toggle test output, [:] for the terminal, [h] for more options>
+2024-05-17 09:27:16,521 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread) Routes stopped (total:4)
+2024-05-17 09:27:16,521 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped route1 (timer://java)
+2024-05-17 09:27:16,522 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped generator (timer://java)
+2024-05-17 09:27:16,523 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped standard (direct://standardQueue)
+2024-05-17 09:27:16,523 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped priority (direct://priorityQueue)
+----
+
+This is for the `quarkus:dev` side.
+
+We could also run the `quarkus-run.jar`
+
+[source,sh]
+----
+$ mvn clean install
+$ cd target/
+$ java -jar quarkus-run.jar 
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2024-05-17 09:29:19,150 INFO  [org.apa.cam.qua.cor.CamelBootstrapRecorder] (main) Bootstrap runtime: org.apache.camel.quarkus.main.CamelMainRuntime
+2024-05-17 09:29:19,157 INFO  [org.apa.cam.mai.MainSupport] (main) Apache Camel (Main) 4.5.0 is starting
+2024-05-17 09:29:19,349 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) is starting
+2024-05-17 09:29:19,370 INFO  [org.apa.cam.mai.BaseMainSupport] (main) Property-placeholders summary
+2024-05-17 09:29:19,371 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] priority-marker=*
+2024-05-17 09:29:19,371 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] items=*radiator *engine door window
+2024-05-17 09:29:19,372 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Routes startup (total:4)
+2024-05-17 09:29:19,372 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started generator (timer://java)
+2024-05-17 09:29:19,372 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started standard (direct://standardQueue)
+2024-05-17 09:29:19,372 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started priority (direct://priorityQueue)
+2024-05-17 09:29:19,372 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started route1 (timer://java)
+2024-05-17 09:29:19,373 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) started in 23ms (build:0ms init:0ms start:23ms)
+2024-05-17 09:29:19,467 INFO  [io.quarkus] (main) camel-k-example-basic-migrated-to-quarkus 1.0-SNAPSHOT on JVM (powered by Quarkus 3.10.0) started in 0.908s. Listening on: http://0.0.0.0:8080
+2024-05-17 09:29:19,467 INFO  [io.quarkus] (main) Profile prod activated. 
+2024-05-17 09:29:19,468 INFO  [io.quarkus] (main) Installed features: [camel-attachments, camel-bean, camel-core, camel-direct, camel-log, camel-microprofile-health, camel-platform-http, camel-rest, camel-rest-openapi, camel-timer, cdi, smallrye-context-propagation, smallrye-health, vertx]
+2024-05-17 09:29:20,398 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 09:29:20,399 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:21,400 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:22,400 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:23,373 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 09:29:23,400 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:24,400 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:25,400 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:26,373 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 09:29:26,399 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:27,400 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:28,400 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 09:29:29,373 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 09:29:29,399 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+^C2024-05-17 09:29:29,885 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread) Apache Camel 4.5.0 (camel-1) is shutting down (timeout:45s)
+2024-05-17 09:29:29,898 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread) Routes stopped (total:4)
+2024-05-17 09:29:29,898 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped route1 (timer://java)
+2024-05-17 09:29:29,898 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped priority (direct://priorityQueue)
+2024-05-17 09:29:29,898 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped standard (direct://standardQueue)
+2024-05-17 09:29:29,899 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread)     Stopped generator (timer://java)
+2024-05-17 09:29:29,903 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (Shutdown thread) Apache Camel 4.5.0 (camel-1) shutdown in 18ms (uptime:10s)
+2024-05-17 09:29:29,926 INFO  [io.quarkus] (Shutdown thread) camel-k-example-basic-migrated-to-quarkus stopped in 0.060s
+----
+
+=== Export to Camel-Quarkus with OCP as target
+
+=== Prepare OCP cluster
+
+You can create a Developer Sandbox on Openshift by looking at the following URL https://developers.redhat.com/developer-sandbox
+
+once you created everything you should be able to have access to your OCP Cluster. On the drop down menu on the right select copy login command.
+
+Copy the login command and execute it
+
+[source,sh]
+----
+$ oc login --token=<your_token> --server=<your_server_url>
+----
+
+You should already be on the namespace named `<username>-dev`.
+
+=== Export to Camel-Quarkus with OCP as target
+
+Let's use the export subcommand from camel-jbang
+
+[source,sh]
+----
+$ camel export --runtime=quarkus --gav=com.github.oscerd:camel-k-example-basic-migrated-to-quarkus:1.0-SNAPSHOT --deps=io.quarkus:quarkus-openshift --directory=./camel-k-example-basic-quarkus-on-ocp
+Generating fresh run data
+Exporting as Quarkus project to: ./camel-k-example-basic-quarkus-on-ocp
+----
+
+Since we are already authenticated from the step of Prepare OCP Cluster, we should be able to run the deploy directly:
+
+[source,sh]
+----
+$ cd camel-k-example-basic-quarkus-on-ocp/
+$ ./mvnw install -Dquarkus.openshift.deploy=true
+.
+.
+.
+.
+.
+[INFO] [io.quarkus.container.image.openshift.deployment.OpenshiftProcessor] Push successful
+.
+.
+.
+.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service camel-k-example-basic-migrated-to-quarkus.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream openjdk-17.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream camel-k-example-basic-migrated-to-quarkus.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: BuildConfig camel-k-example-basic-migrated-to-quarkus.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Deployment camel-k-example-basic-migrated-to-quarkus.
+[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 69123ms
+----
+
+Now we can verify everything is working:
+
+[source,sh]
+----
+$ oc get pods
+NAME                                                         READY   STATUS      RESTARTS   AGE
+camel-k-example-basic-migrated-to-quarkus-2-build            0/1     Completed   0          3m8s
+camel-k-example-basic-migrated-to-quarkus-6d6c6f9cb9-kgbwz   1/1     Running     0          2m29s
+----
+
+and look at the logs
+
+[source,sh]
+----
+$ $ oc logs camel-k-example-basic-migrated-to-quarkus-6d6c6f9cb9-kgbwz
+Starting the Java application using /opt/jboss/container/java/run/run-java.sh ...
+INFO exec -a "java" java -XX:MaxRAMPercentage=80.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+ExitOnOutOfMemoryError -cp "." -jar /deployments/quarkus-run.jar 
+INFO running in /deployments
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2024-05-17 07:55:14,324 INFO  [org.apa.cam.qua.cor.CamelBootstrapRecorder] (main) Bootstrap runtime: org.apache.camel.quarkus.main.CamelMainRuntime
+2024-05-17 07:55:14,326 INFO  [org.apa.cam.mai.MainSupport] (main) Apache Camel (Main) 4.5.0 is starting
+2024-05-17 07:55:14,787 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) is starting
+2024-05-17 07:55:14,798 INFO  [org.apa.cam.mai.BaseMainSupport] (main) Property-placeholders summary
+2024-05-17 07:55:14,799 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] priority-marker=*
+2024-05-17 07:55:14,799 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] items=*radiator *engine door window
+2024-05-17 07:55:14,800 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Routes startup (total:4)
+2024-05-17 07:55:14,801 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started route1 (timer://java)
+2024-05-17 07:55:14,801 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started generator (timer://java)
+2024-05-17 07:55:14,801 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started standard (direct://standardQueue)
+2024-05-17 07:55:14,801 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started priority (direct://priorityQueue)
+2024-05-17 07:55:14,801 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) started in 13ms (build:0ms init:0ms start:13ms)
+2024-05-17 07:55:14,990 INFO  [io.quarkus] (main) camel-k-example-basic-migrated-to-quarkus 1.0-SNAPSHOT on JVM (powered by Quarkus 3.10.0) started in 2.080s. Listening on: http://0.0.0.0:8080
+2024-05-17 07:55:14,990 INFO  [io.quarkus] (main) Profile prod activated. 
+2024-05-17 07:55:14,990 INFO  [io.quarkus] (main) Installed features: [camel-attachments, camel-bean, camel-core, camel-direct, camel-log, camel-microprofile-health, camel-platform-http, camel-rest, camel-rest-openapi, camel-timer, cdi, kubernetes, smallrye-context-propagation, smallrye-health, vertx]
+2024-05-17 07:55:15,808 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:15,821 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 07:55:16,798 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:17,798 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:18,799 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:18,810 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:55:19,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:20,799 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:21,799 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:21,810 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 07:55:22,799 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:23,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:24,799 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:24,811 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 07:55:25,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:26,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:27,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:27,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:55:28,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:29,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:30,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:30,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:55:31,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:32,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:33,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:33,811 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 07:55:34,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:35,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:36,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:36,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:55:37,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:38,800 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:39,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:39,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:55:40,802 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:41,801 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:42,802 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:42,811 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 07:55:43,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:44,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:45,802 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:45,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:55:46,802 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:47,802 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:48,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:48,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:55:49,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:50,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:51,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:51,810 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 07:55:52,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:53,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:54,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:54,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:55:55,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:56,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:57,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:57,811 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 07:55:58,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:55:59,803 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:00,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:00,812 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:01,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:02,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:03,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:03,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:56:04,805 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:05,804 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:06,805 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:06,811 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 07:56:07,805 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:08,806 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:09,805 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:09,810 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:56:10,806 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:11,806 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:12,806 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:12,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:13,807 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:14,806 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:15,807 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:15,811 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 07:56:16,807 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:17,808 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:18,807 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:18,810 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:19,808 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:20,808 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:21,808 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:21,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:22,808 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:23,809 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:24,809 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:24,810 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:25,810 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:26,809 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:27,810 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:27,811 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:28,810 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:29,811 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:30,810 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:30,813 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:31,811 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:32,810 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:33,811 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:33,812 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:34,811 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:35,812 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:36,811 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:36,812 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+2024-05-17 07:56:37,812 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:38,812 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:39,812 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:39,813 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 07:56:40,813 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:41,814 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:42,813 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:56:42,813 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:43,813 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:44,813 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:45,813 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:56:45,813 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:46,814 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:47,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:48,813 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: radiator
+2024-05-17 07:56:48,814 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:49,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:50,816 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:51,813 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:56:51,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:52,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:53,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:54,813 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: door
+2024-05-17 07:56:54,816 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:55,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:56,816 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:57,813 INFO  [standard] (Camel (camel-1) thread #1 - timer://java) Standard item: window
+2024-05-17 07:56:57,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:58,816 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:56:59,815 INFO  [info] (Camel (camel-1) thread #1 - timer://java) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-17 07:57:00,813 INFO  [priority] (Camel (camel-1) thread #1 - timer://java) !!Priority item: engine
+----
+
+
+
