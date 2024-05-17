@@ -7,3 +7,4 @@ I'm taking the Camel K official examples as target.
 ### Examples 
 
 Camel-k-basic-example
+Camel-k-example-jms
