@@ -1,0 +1,23 @@
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: artemis-broker
+spec:
+  acceptors:
+    - name: artemis-acceptor
+      protocols: 'artemis,core,openwire'
+      port: 61616
+      sslEnabled: false
+    - name: amqp-acceptor
+      protocols: amqp
+      port: 5672
+      sslEnabled: false
+  deploymentPlan:
+    size: 1
+    persistenceEnabled: false
+    requireLogin: false
+    messageMigration: false
+    managementRBACEnabled: true
+    journalType: nio
+    jolokiaAgentEnabled: false
+    image: placeholder

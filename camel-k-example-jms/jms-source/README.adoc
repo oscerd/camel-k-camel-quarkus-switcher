@@ -1,0 +1,137 @@
+# Camel K JMS Example
+
+This example demonstrates how to get started with Camel K by showing you some of the most important
+features that you should know before trying to develop more complex examples.
+
+We are going to use Camel-Jbang to create the basic project for Camel Quarkus and then iterate to deploy on OCP.
+
+## Install JBang
+
+First install JBang according to https://www.jbang.dev
+
+When JBang is installed then you should be able to run from a shell:
+
+[source,sh]
+----
+$ jbang --version
+----
+
+This will output the version of JBang.
+
+To run this example you can either install Camel on JBang via:
+
+[source,sh]
+----
+$ jbang app install camel@apache/camel
+----
+
+Which allows to run CamelJBang with `camel` as shown below.
+
+=== Export to Camel-Quarkus with OCP as target
+
+=== Prepare OCP cluster
+
+You can create a Developer Sandbox on Openshift by looking at the following URL https://developers.redhat.com/developer-sandbox
+
+once you created everything you should be able to have access to your OCP Cluster. On the drop down menu on the right select copy login command.
+
+Copy the login command and execute it
+
+[source,sh]
+----
+$ oc login --token=<your_token> --server=<your_server_url>
+----
+
+You should already be on the namespace named `<username>-dev`.
+
+If you use a normal OCP Cluster just create a new project named `jms-example`.
+
+[source,sh]
+----
+$ oc new-project jms-example
+----
+
+=== Install AMQ Broker Operator
+
+In the Openshift ui select the operators list from OperatorHub and install the "Red Hat Integration - AMQ Broker for RHEL 8 (Multiarch)" operator on `jms-example` project.
+
+Once everything is complete you can create your resources with the following command:
+
+[source,sh]
+----
+$ oc create -f ../amq-broker-instance.yaml
+activemqartemis.broker.amq.io/artemis-broker created
+----
+
+You can check everything worked with:
+
+[source,sh]
+----
+$ oc get activemqartemises
+NAME             AGE
+artemis-broker   47s
+----
+
+=== Export to Camel-Quarkus with OCP as target
+
+Let's use the export subcommand from camel-jbang
+
+[source,sh]
+----
+$ camel export --runtime=quarkus --gav=com.github.oscerd:camel-k-example-basic-migrated-to-quarkus:1.0-SNAPSHOT --deps=io.quarkus:quarkus-openshift,org.amqphub.quarkus:quarkus-qpid-jms --directory=./camel-k-example-jms-source-on-ocp
+Generating fresh run data
+Exporting as Quarkus project to: ./camel-k-example-jms-source-on-ocp
+----
+
+now let's run the consumer on OCP.
+
+[source,sh]
+----
+$ cd camel-k-example-jms-source-on-ocp/
+$ ./mvnw install -Dquarkus.openshift.deploy=true
+----
+
+To verify everything is fine 
+
+[source,sh]
+----
+$ oc get pods
+NAME                                                         READY   STATUS      RESTARTS   AGE
+amq-broker-controller-manager-768c99f8d5-jbm5n               1/1     Running     0          10m
+artemis-broker-ss-0                                          1/1     Running     0          9m11s
+camel-k-example-basic-migrated-to-quarkus-1-build            0/1     Completed   0          2m41s
+camel-k-example-basic-migrated-to-quarkus-6bccf9b6bd-9g7wr   1/1     Running     0          2m7s
+----
+
+and check the logs
+
+[source,sh]
+----
+$ oc logs camel-k-example-basic-migrated-to-quarkus-6b54848d77-5tbj7
+Starting the Java application using /opt/jboss/container/java/run/run-java.sh ...
+INFO exec -a "java" java -XX:MaxRAMPercentage=80.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+ExitOnOutOfMemoryError -cp "." -jar /deployments/quarkus-run.jar 
+INFO running in /deployments
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2024-05-17 12:29:19,315 INFO  [org.apa.cam.qua.cor.CamelBootstrapRecorder] (main) Bootstrap runtime: org.apache.camel.quarkus.main.CamelMainRuntime
+2024-05-17 12:29:19,319 INFO  [org.apa.cam.mai.MainSupport] (main) Apache Camel (Main) 4.5.0 is starting
+2024-05-17 12:29:19,403 INFO  [org.apa.cam.mai.BaseMainSupport] (main) Auto-configuration summary
+2024-05-17 12:29:19,403 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] camel.main.modeline=true
+2024-05-17 12:29:19,538 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) is starting
+2024-05-17 12:29:19,998 INFO  [org.apa.qpi.jms.JmsConnection] (AmqpProvider :(1):[amqp://artemis-broker-hdls-svc.jms-example.svc.cluster.local:5672]) Connection ID:12e3f7cb-3c61-45e0-a901-0c1ef20f8953:1 connected to server: amqp://artemis-broker-hdls-svc.jms-example.svc.cluster.local:5672
+2024-05-17 12:29:20,007 INFO  [org.apa.cam.mai.BaseMainSupport] (main) Property-placeholders summary
+2024-05-17 12:29:20,008 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] jms.destinationType=queue
+2024-05-17 12:29:20,008 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] jms.destinationName=person
+2024-05-17 12:29:20,010 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Routes startup (total:1)
+2024-05-17 12:29:20,010 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started route1 (jms://queue:person)
+2024-05-17 12:29:20,010 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) started in 472ms (build:0ms init:0ms start:472ms)
+2024-05-17 12:29:20,093 INFO  [io.quarkus] (main) camel-k-example-basic-migrated-to-quarkus 1.0-SNAPSHOT on JVM (powered by Quarkus 3.10.0) started in 1.737s. Listening on: http://0.0.0.0:8080
+2024-05-17 12:29:20,093 INFO  [io.quarkus] (main) Profile prod activated. 
+2024-05-17 12:29:20,093 INFO  [io.quarkus] (main) Installed features: [camel-attachments, camel-core, camel-dsl-modeline, camel-jms, camel-log, camel-microprofile-health, camel-platform-http, camel-rest, camel-rest-openapi, cdi, kubernetes, qpid-jms, smallrye-context-propagation, smallrye-health, vertx]
+----
+
+Now we can switch to the jms-sink to produce messages.
+
+
