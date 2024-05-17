@@ -1,4 +1,4 @@
-Using JMS with Camel K
+Using JMS with Camel K and switch to Camel-Quarkus
 ============
 
 Introduction
