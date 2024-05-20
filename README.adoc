@@ -8,3 +8,4 @@ I'm taking the Camel K official examples as target.
 
 Camel-k-basic-example
 Camel-k-example-jms
+Camel-k-jdbc-example
