@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-datasource
+  namespace: camel-k-jdbc
+type: Opaque
+stringData:
+  quarkus.datasource.jdbc.url: jdbc:postgresql://postgres-primary.camel-k-jdbc.svc:5432/test
+  quarkus.datasource.username: postgresadmin
+  quarkus.datasource.password: q+1-car1j>N6:X@ZezH)z6W)

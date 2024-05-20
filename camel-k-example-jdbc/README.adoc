@@ -1,0 +1,233 @@
+# Camel K JDBC Example
+
+This example demonstrates how to get started with Camel K by showing you some of the most important
+features that you should know before trying to develop more complex examples.
+
+We are going to use Camel-Jbang to create the basic project for Camel Quarkus and then iterate to deploy on OCP.
+
+## Install JBang
+
+First install JBang according to https://www.jbang.dev
+
+When JBang is installed then you should be able to run from a shell:
+
+[source,sh]
+----
+$ jbang --version
+----
+
+This will output the version of JBang.
+
+To run this example you can either install Camel on JBang via:
+
+[source,sh]
+----
+$ jbang app install camel@apache/camel
+----
+
+Which allows to run CamelJBang with `camel` as shown below.
+
+## 1. Preparing the project
+
+We'll connect to the `camel-k-jdbc` project and check the installation status. To change project, open a terminal tab and type the following command:
+
+```
+oc project camel-k-jdbc
+```
+
+## Setting up Database
+
+This example uses a PostgreSQL database. We want to install it on the project `camel-transformations`. We can go to the OpenShift 4.x WebConsole page, use the OperatorHub menu item on the left hand side menu and use it to find and install "Crunchy Postgres for Kubernetes". This will install the operator and may take a couple of minutes to install.
+
+Once the operator is installed, we can create a new database using
+
+```
+oc create -f postgres.yaml
+```
+
+We connect to the database pod to create a table and add data to be extracted later.
+
+```
+oc rsh $(oc get pods -l postgres-operator.crunchydata.com/role=master -o name)
+```
+
+```
+psql -U postgres test \
+-c "CREATE TABLE test (data TEXT PRIMARY KEY);
+INSERT INTO test(data) VALUES ('hello'), ('world');
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgresadmin;"
+```
+```
+exit
+```
+
+Now, we need to find out Postgres username, password and hostname and update the values in the `my-datasource.yaml`.
+
+```
+USER_NAME=$(oc get secret postgres-pguser-postgresadmin --template={{.data.user}} | base64 -d)
+USER_PASSWORD=$(oc get secret postgres-pguser-postgresadmin --template={{.data.password}} | base64 -d)
+HOST=$(oc get secret postgres-pguser-postgresadmin --template={{.data.host}} | base64 -d)
+PASSWORD_SKIP_SPEC_CHAR=$(sed -e 's/[&\\/]/\\&/g; s/$/\\/' -e '$s/\\$//' <<<"$USER_PASSWORD")
+
+sed -i "s/^  quarkus.datasource.username: .*/  quarkus.datasource.username: $USER_NAME/" my-datasource.yaml
+sed -i "s/^  quarkus.datasource.password: .*/  quarkus.datasource.password: $PASSWORD_SKIP_SPEC_CHAR/" my-datasource.yaml
+sed -i "s/^  quarkus.datasource.jdbc.url:.*/  quarkus.datasource.jdbc.url: jdbc:postgresql:\/\/$HOST:5432\/test/" my-datasource.yaml
+```
+
+For macOS use these commands:
+```
+sed -i '' "s/^  quarkus.datasource.username: .*/  quarkus.datasource.username: $USER_NAME/" my-datasource.yaml
+sed -i '' "s/^  quarkus.datasource.password: .*/  quarkus.datasource.password: $PASSWORD_SKIP_SPEC_CHAR/" my-datasource.yaml
+sed -i '' "s/^  quarkus.datasource.jdbc.url:.*/  quarkus.datasource.jdbc.url: jdbc:postgresql:\/\/$HOST:5432\/test/" my-datasource.yaml
+```
+
+### Setting cluster secret
+
+You should set a Kubernetes `Secret` in order to avoid exposing sensitive information. You can bundle the configuration expected by the application in a secret. For convenience we have put them into a file named `datasource.properties`, however, they can be provided in the cluster differently. Please, notice that these values have to correspond to the ones expected by your instance, so, you can replace the values provided in our examples with yours.
+
+```
+oc create -f my-datasource.yaml
+```
+
+=== Export to Camel-Quarkus with OCP as target
+
+=== Prepare OCP cluster
+
+You can create a Developer Sandbox on Openshift by looking at the following URL https://developers.redhat.com/developer-sandbox
+
+once you created everything you should be able to have access to your OCP Cluster. On the drop down menu on the right select copy login command.
+
+Copy the login command and execute it
+
+[source,sh]
+----
+$ oc login --token=<your_token> --server=<your_server_url>
+----
+
+You should already be on the namespace named `<username>-dev`.
+
+=== Export to Camel-Quarkus with OCP as target
+
+Let's use the export subcommand from camel-jbang
+
+[source,sh]
+----
+$ camel export --runtime=quarkus --gav=com.github.oscerd:camel-k-example-jdbc-migrated-to-quarkus:1.0-SNAPSHOT --deps=io.quarkus:quarkus-openshift --directory=./camel-k-example-jdbc-quarkus-on-ocp
+Generating fresh run data
+Exporting as Quarkus project to: ./camel-k-example-jdbc-quarkus-on-ocp
+----
+
+We should do a little step to make the deployment use the secret.
+
+[source,sh]
+----
+$ cd camel-k-example-jdbc-quarkus-on-ocp/
+$ gedit src/main/resources/application.properties
+----
+
+Remove the first three line and add the following line
+
+[source,sh]
+----
+quarkus.openshift.env.secrets=my-datasource
+----
+
+Since we are already authenticated from the step of Prepare OCP Cluster, we should be able to run the deploy directly:
+
+[source,sh]
+----
+$ ./mvnw install -Dquarkus.openshift.deploy=true
+.
+.
+.
+.
+.
+[INFO] [io.quarkus.container.image.openshift.deployment.OpenshiftProcessor] Push successful
+.
+.
+.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service camel-k-example-jdbc-migrated-to-quarkus.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream openjdk-17.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream camel-k-example-jdbc-migrated-to-quarkus.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: BuildConfig camel-k-example-jdbc-migrated-to-quarkus.
+[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Deployment camel-k-example-jdbc-migrated-to-quarkus.
+[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 97307ms
+
+----
+
+Now we can verify everything is working:
+
+[source,sh]
+----
+$ oc get pods
+NAME                                                       READY   STATUS      RESTARTS   AGE
+camel-k-example-jdbc-migrated-to-quarkus-1-build           0/1     Completed   0          6m17s
+camel-k-example-jdbc-migrated-to-quarkus-2-build           0/1     Completed   0          2m20s
+camel-k-example-jdbc-migrated-to-quarkus-94949bf45-t49th   1/1     Running     0          102s
+pgo-6fd6cbff4d-g4j4r                                       1/1     Running     0          15m
+postgres-backup-nzxj-q5dzc                                 0/1     Completed   0          14m
+postgres-instance1-bm9r-0                                  4/4     Running     0          14m
+postgres-repo-host-0                                       2/2     Running     0          14m
+----
+
+and look at the logs
+
+[source,sh]
+----
+$ oc logs camel-k-example-jdbc-migrated-to-quarkus-94949bf45-t49th
+Starting the Java application using /opt/jboss/container/java/run/run-java.sh ...
+INFO exec -a "java" java -XX:MaxRAMPercentage=80.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+ExitOnOutOfMemoryError -cp "." -jar /deployments/quarkus-run.jar 
+INFO running in /deployments
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2024-05-20 07:56:53,692 INFO  [org.apa.cam.qua.cor.CamelBootstrapRecorder] (main) Bootstrap runtime: org.apache.camel.quarkus.main.CamelMainRuntime
+2024-05-20 07:56:53,696 INFO  [org.apa.cam.mai.MainSupport] (main) Apache Camel (Main) 4.5.0 is starting
+2024-05-20 07:56:53,757 INFO  [org.apa.cam.mai.BaseMainSupport] (main) Auto-configuration summary
+2024-05-20 07:56:53,758 INFO  [org.apa.cam.mai.BaseMainSupport] (main)     [MicroProfilePropertiesSource] camel.main.modeline=true
+2024-05-20 07:56:53,892 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) is starting
+2024-05-20 07:56:53,960 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Routes startup (total:2)
+2024-05-20 07:56:53,961 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started route1 (timer://foo)
+2024-05-20 07:56:53,961 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main)     Started route2 (timer://sql-insert)
+2024-05-20 07:56:53,961 INFO  [org.apa.cam.imp.eng.AbstractCamelContext] (main) Apache Camel 4.5.0 (camel-1) started in 68ms (build:0ms init:0ms start:68ms)
+2024-05-20 07:56:54,087 INFO  [io.quarkus] (main) camel-k-example-jdbc-migrated-to-quarkus 1.0-SNAPSHOT on JVM (powered by Quarkus 3.10.0) started in 1.536s. Listening on: http://0.0.0.0:8080
+2024-05-20 07:56:54,087 INFO  [io.quarkus] (main) Profile prod activated. 
+2024-05-20 07:56:54,088 INFO  [io.quarkus] (main) Installed features: [agroal, camel-attachments, camel-core, camel-dsl-modeline, camel-jdbc, camel-log, camel-microprofile-health, camel-platform-http, camel-rest, camel-rest-openapi, camel-timer, cdi, jdbc-postgresql, kubernetes, narayana-jta, smallrye-context-propagation, smallrye-health, vertx]
+2024-05-20 07:56:55,586 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}]]
+2024-05-20 07:56:55,626 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #1')]
+2024-05-20 07:57:04,963 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}]]
+2024-05-20 07:57:04,963 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #2')]
+2024-05-20 07:57:14,963 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}]]
+2024-05-20 07:57:15,126 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #3')]
+2024-05-20 07:57:24,962 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:57:24,964 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #4')]
+2024-05-20 07:57:34,963 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:57:34,964 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #5')]
+2024-05-20 07:57:44,963 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:57:44,964 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #6')]
+2024-05-20 07:57:54,963 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:57:54,964 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #7')]
+2024-05-20 07:58:04,963 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:58:04,963 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #8')]
+2024-05-20 07:58:14,963 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:58:15,068 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #9')]
+2024-05-20 07:58:24,964 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:58:24,968 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #10')]
+2024-05-20 07:58:34,968 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:58:34,973 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #11')]
+2024-05-20 07:58:44,964 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:58:44,964 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #12')]
+2024-05-20 07:58:54,965 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:58:54,965 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #13')]
+2024-05-20 07:59:04,965 INFO  [info] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: java.util.ArrayList, Body: [{data=hello}, {data=world}, {data=message #1}, {data=message #2}, {data=message #3}]]
+2024-05-20 07:59:04,965 INFO  [info] (Camel (camel-1) thread #2 - timer://sql-insert) Exchange[ExchangePattern: InOnly, BodyType: String, Body: INSERT INTO test (data) VALUES ('message #14')]
+----
+
+## 6. Uninstall
+
+To clean up everything, execute the following command:
+
+```
+oc delete project camel-k-jdbc
+```
