@@ -3,4 +3,5 @@
 **/camel-k-example-jms-sink-on-ocp
 **/camel-k-example-jms-source-on-ocp
 **/camel-k-example-jdbc-quarkus-on-ocp
+**/camel-k-example-basic-sb-on-ocp
 **/.camel-jbang
