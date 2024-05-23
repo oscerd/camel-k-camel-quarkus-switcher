@@ -406,4 +406,135 @@ __  ____  __  _____   ___  __ ____  ______
 ----
 
 
+=== Export to Camel-Spring-Boot with OCP as target
 
+Let's use the export subcommand from camel-jbang
+
+[source,sh]
+----
+$ camel export --runtime=spring-boot --gav=com.github.oscerd:camel-k-example-basic-migrated-to-sb:1.0-SNAPSHOT --deps=io.quarkus:quarkus-openshift --directory=./camel-k-example-basic-sb-on-ocp
+Generating fresh run data
+Exporting as Quarkus project to: ./camel-k-example-basic-sb-on-ocp
+----
+
+We need to add a a plugin to make everything work
+
+[source,sh]
+----
+$ cd camel-k-example-basic-sb-on-ocp/
+----
+
+Open the pom.xml and add the following plugin in the plugins section:
+
+[source,sh]
+----
+            <plugin>
+                <groupId>org.eclipse.jkube</groupId>
+                <artifactId>openshift-maven-plugin</artifactId>
+                <version>1.16.2</version>
+            </plugin>
+----
+
+Let's create a new project on OCP for running this CSB deployment
+
+[source,sh]
+----
+$ oc new-project camel-k-basic-csb
+----
+
+Now we are able to build and run the application
+
+
+[source,sh]
+----
+$ mvn package oc:build
+.
+.
+.
+.
+
+[INFO] oc: Build camel-k-example-basic-migrated-to-sb-s2i-1 in status Complete
+[INFO] oc: Found tag on ImageStream camel-k-example-basic-migrated-to-sb tag: sha256:a23a5903022b55162e25f7416bea7778719415f4e83beed9bf5f3b9a3d1a2ed7
+[INFO] oc: ImageStream camel-k-example-basic-migrated-to-sb written to /home/oscerd/workspace/redhat/migration-k-quarkus/camel-k-example-basic/camel-k-example-basic-sb-on-ocp/target/camel-k-example-basic-migrated-to-sb-is.yml
+----
+
+Now it's time to deploy and create the resources on the OCP Cluster
+
+[source,sh]
+----
+$ mvn oc:resource oc:deploy
+.
+.
+.
+.
+
+[INFO] oc: Creating a Service in camel-k-basic-csb namespace with name camel-k-example-basic-migrated-to-sb from openshift.yml
+[INFO] oc: Created Service: target/jkube/applyJson/camel-k-basic-csb/service-camel-k-example-basic-migrated-to-sb.json
+[INFO] oc: Creating a DeploymentConfig in camel-k-basic-csb namespace with name camel-k-example-basic-migrated-to-sb from openshift.yml
+[INFO] oc: Created DeploymentConfig: target/jkube/applyJson/camel-k-basic-csb/deploymentconfig-camel-k-example-basic-migrated-to-sb.json
+[INFO] oc: Creating Route camel-k-basic-csb:camel-k-example-basic-migrated-to-sb host: null
+[INFO] oc: HINT: Use the command `oc get pods -w` to watch your pods start up
+----
+
+Let's look at the pods
+
+[source,sh]
+----
+$ oc get pods
+NAME                                               READY   STATUS      RESTARTS   AGE
+camel-k-example-basic-migrated-to-sb-1-deploy      0/1     Completed   0          46s
+camel-k-example-basic-migrated-to-sb-1-dhp6d       1/1     Running     0          45s
+camel-k-example-basic-migrated-to-sb-s2i-1-build   0/1     Completed   0          3m3s
+----
+
+and let's take a look at logs
+
+[source,sh]
+----
+$ oc logs camel-k-example-basic-migrated-to-sb-1-dhp6d
+oc logs camel-k-example-basic-migrated-to-sb-1-dhp6d
+Starting the Java application using /opt/jboss/container/java/run/run-java.sh ...
+INFO exec  java -javaagent:/usr/share/java/jolokia-jvm-agent/jolokia-jvm.jar=config=/opt/jboss/container/jolokia/etc/jolokia.properties -javaagent:/usr/share/java/prometheus-jmx-exporter/jmx_prometheus_javaagent.jar=9779:/opt/jboss/container/prometheus/etc/jmx-exporter-config.yaml -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+ExitOnOutOfMemoryError -cp ".:/deployments/*" org.springframework.boot.loader.launch.JarLauncher  
+I> No access restrictor found, access to any MBean is allowed
+Jolokia: Agent started with URL https://172.17.0.51:8778/jolokia/
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2024-05-23T04:53:38.291Z  INFO 1 --- [           main] c.g.o.c.CamelApplication                 : Starting CamelApplication v1.0-SNAPSHOT using Java 21.0.1 with PID 1 (/deployments/BOOT-INF/classes started by jboss in /deployments)
+2024-05-23T04:53:38.296Z  INFO 1 --- [           main] c.g.o.c.CamelApplication                 : No active profile set, falling back to 1 default profile: "default"
+2024-05-23T04:53:40.439Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2024-05-23T04:53:40.465Z  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2024-05-23T04:53:40.466Z  INFO 1 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2024-05-23T04:53:40.524Z  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2024-05-23T04:53:40.526Z  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2096 ms
+2024-05-23T04:53:41.985Z  INFO 1 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2024-05-23T04:53:42.137Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2024-05-23T04:53:42.573Z  INFO 1 --- [           main] o.a.c.impl.engine.AbstractCamelContext   : Apache Camel 4.6.0 (camel-1) is starting
+2024-05-23T04:53:42.601Z  INFO 1 --- [           main] o.a.c.impl.engine.AbstractCamelContext   : Routes startup (total:4)
+2024-05-23T04:53:42.601Z  INFO 1 --- [           main] o.a.c.impl.engine.AbstractCamelContext   :     Started route1 (timer://java)
+2024-05-23T04:53:42.601Z  INFO 1 --- [           main] o.a.c.impl.engine.AbstractCamelContext   :     Started generator (timer://java)
+2024-05-23T04:53:42.601Z  INFO 1 --- [           main] o.a.c.impl.engine.AbstractCamelContext   :     Started standard (direct://standardQueue)
+2024-05-23T04:53:42.601Z  INFO 1 --- [           main] o.a.c.impl.engine.AbstractCamelContext   :     Started priority (direct://priorityQueue)
+2024-05-23T04:53:42.602Z  INFO 1 --- [           main] o.a.c.impl.engine.AbstractCamelContext   : Apache Camel 4.6.0 (camel-1) started in 25ms (build:0ms init:0ms start:25ms)
+2024-05-23T04:53:42.607Z  INFO 1 --- [           main] c.g.o.c.CamelApplication                 : Started CamelApplication in 5.021 seconds (process running for 5.835)
+2024-05-23T04:53:43.608Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:43.624Z  INFO 1 --- [ - timer://java] priority                                 : !!Priority item: engine
+2024-05-23T04:53:44.601Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:45.607Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:46.608Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:46.650Z  INFO 1 --- [ - timer://java] priority                                 : !!Priority item: engine
+2024-05-23T04:53:47.608Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:48.634Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:49.609Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:49.612Z  INFO 1 --- [ - timer://java] priority                                 : !!Priority item: engine
+2024-05-23T04:53:50.610Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:51.610Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:52.610Z  INFO 1 --- [ - timer://java] info                                     : Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello World! Camel K route written in Java.]
+2024-05-23T04:53:52.612Z  INFO 1 --- [ - timer://java] priority                                 : !!Priority item: radiator
+----
